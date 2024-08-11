@@ -20,6 +20,10 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
+        $this->call([
+            CouponSeeder::class,
+        ]);
+
         \App\Models\Product::factory(20)->create();
     }
 }

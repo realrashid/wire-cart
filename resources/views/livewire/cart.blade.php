@@ -1,9 +1,14 @@
 <?php
 
-use function Livewire\Volt\{title, computed, on};
+use function Livewire\Volt\{title, computed, on, state, rules};
 use RealRashid\Cart\Facades\Cart;
+use App\Models\Coupon;
 
 title('Cart');
+
+state(['couponCode' => '']);
+
+rules(['couponCode' => 'required']);
 
 $items = computed(function () {
     return cart()->instance('cart')->all();
@@ -20,7 +25,7 @@ $incrementQuantity = function ($itemId) {
     if ($cartItem) {
         Cart::instance('cart')->updateQuantity($itemId, $cartItem->getQuantity() + 1);
         $this->dispatch('cart-updated');
-        $this->dispatch('toast', message: "{$cartItem->getName()} quantity Successfully Updated", data: ['position' => 'top-center', 'type' => 'success']);
+        $this->dispatch('toast', message: "{$cartItem->getName()} quantity Successfully Updated");
     }
 };
 
@@ -33,7 +38,7 @@ $decrementQuantity = function ($itemId) {
         Cart::instance('cart')->updateQuantity($itemId, $cartItem->getQuantity() - 1);
 
         $this->dispatch('cart-updated');
-        $this->dispatch('toast', message: "{$cartItem->getName()} quantity Successfully Updated", data: ['position' => 'top-center', 'type' => 'success']);
+        $this->dispatch('toast', message: "{$cartItem->getName()} quantity Successfully Updated");
     } else {
         // If quantity is 1 or the item is not found, remove it from the cart
         $this->dispatch('cart-updated');
@@ -41,11 +46,42 @@ $decrementQuantity = function ($itemId) {
     }
 };
 
+$applyCoupon = function () {
+    $this->validate();
+
+    $coupon = Coupon::where('code', $this->couponCode)->first();
+
+    if (!$coupon || !$coupon->isValid()) {
+        $this->dispatch('toast', message: 'Invalid Coupon Code', data: ['type' => 'danger']);
+        return;
+    }
+
+    try {
+        // Create the appropriate coupon object
+        $couponObject = $coupon->createCoupon();
+
+        // Apply the coupon to the cart
+        Cart::instance('cart')->applyCoupon($couponObject);
+
+        // Notify success
+        $this->dispatch('toast', message: 'Coupon Applied Successfully');
+    } catch (\Exception $e) {
+        // Handle any exceptions (unsupported coupon types, etc.)
+        $this->dispatch('toast', message: 'Failed to apply coupon: ' . $e->getMessage(), data: ['type' => 'danger']);
+    }
+};
+
+$clearCoupon = function () {
+    $this->couponCode = '';
+    Cart::instance('cart')->removeCoupon();
+    $this->dispatch('toast', message: 'Coupon Remove Successfully');
+};
+
 $clearCart = function () {
     Cart::instance('cart')->clear();
 
     $this->dispatch('cart-cleared');
-    $this->dispatch('toast', message: 'Cart is Successfully Cleared', data: ['position' => 'top-center', 'type' => 'success']);
+    $this->dispatch('toast', message: 'Cart is Successfully Cleared');
 };
 
 ?>
@@ -97,6 +133,40 @@ $clearCart = function () {
             <span class="text-xl font-semibold text-indigo-600">${{ Cart::instance('cart')->subtotal() }}</span>
         </div>
 
+        <!-- Apply Coupon Section -->
+        @if (!Cart::instance('cart')->getAppliedCouponDetails())
+            <div class="flex items-center justify-between mt-2 pt-2">
+                <label for="couponCode" class="font-semibold text-gray-800">Coupon Code:</label>
+                <div class="flex ml-2">
+                    <div class="flex flex-col">
+                        <input type="text" id="couponCode" wire:model.defer="couponCode"
+                            class="border border-gray-300 rounded-l-lg px-4 py-2 w-64 focus:outline-none focus:border-indigo-600 placeholder-gray-400"
+                            placeholder="Enter coupon code...">
+                        @error('couponCode')
+                            <div class="mt-1 text-red-500 text-sm">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <button wire:click.prevent="applyCoupon"
+                        class="bg-indigo-600 text-white px-6 py-2 rounded-r-lg ml-2 hover:bg-indigo-700 transition"
+                        style="height: 2.5rem;">Apply</button>
+                </div>
+            </div>
+        @endif
+
+        <!-- Cart Applied Coupon -->
+        @if (Cart::instance('cart')->getAppliedCouponDetails())
+            <div class="flex items-center justify-between mt-2 pt-2">
+                <span class="font-semibold text-gray-800">Applied Coupon:</span>
+                @php
+                    $appliedCouponDetails = Cart::instance('cart')->getAppliedCouponDetails();
+                @endphp
+                <span class="text-xl font-semibold text-indigo-600">
+                    {{ $appliedCouponDetails->code }} -
+                    ${{ $appliedCouponDetails->discountAmount }} off
+                </span>
+            </div>
+        @endif
+
         <!-- Cart Total -->
         <div class="flex items-center justify-between mt-2 pt-2">
             <span class="font-semibold text-gray-800">Total:</span>
@@ -105,6 +175,11 @@ $clearCart = function () {
 
         <!-- Buttons -->
         <div class="flex justify-center mt-8 space-x-4">
+            @if (Cart::instance('cart')->getAppliedCouponDetails())
+                <a href="#" wire:click.prevent="clearCoupon()"
+                    class="text-indigo-600 px-6 py-2 rounded-full border border-indigo-600 hover:bg-indigo-600 hover:text-white transition">Clear
+                    Coupon</a>
+            @endif
             <a href="#" wire:click.prevent="clearCart()"
                 class="text-indigo-600 px-6 py-2 rounded-full border border-indigo-600 hover:bg-indigo-600 hover:text-white transition">Clear
                 Cart</a>

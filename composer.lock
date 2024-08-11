@@ -3274,16 +3274,16 @@
         },
         {
             "name": "realrashid/cart",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/realrashid/cart.git",
-                "reference": "cec4c889e645e4887e4fd873249c14c542c1182d"
+                "reference": "b0c1eba9ab2b5cf1fe7062752877a3aa2c3a7053"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/realrashid/cart/zipball/cec4c889e645e4887e4fd873249c14c542c1182d",
-                "reference": "cec4c889e645e4887e4fd873249c14c542c1182d",
+                "url": "https://api.github.com/repos/realrashid/cart/zipball/b0c1eba9ab2b5cf1fe7062752877a3aa2c3a7053",
+                "reference": "b0c1eba9ab2b5cf1fe7062752877a3aa2c3a7053",
                 "shasum": ""
             },
             "require": {
@@ -3329,7 +3329,7 @@
                     "role": "Developer"
                 }
             ],
-            "description": "In the realm of e-commerce, efficient cart management is paramount. Meet Cart — your ultimate solution for seamless shopping cart functionality in Laravel applications. Cart simplifies the complexities of shopping cart operations, from product additions to total calculations, ensuring a frictionless user experience.",
+            "description": "Meet Cart — your ultimate solution for seamless shopping cart functionality in Laravel applications. Cart simplifies the complexities of shopping cart operations, from product additions to total calculations, ensuring a frictionless user experience.",
             "homepage": "https://github.com/realrashid/cart",
             "keywords": [
                 "Cart management",
@@ -3370,7 +3370,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2024-06-15T21:00:34+00:00"
+            "time": "2024-08-11T14:18:25+00:00"
         },
         {
             "name": "symfony/clock",

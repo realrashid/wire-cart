@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Product;
+use App\Coupon\FixedAmountCoupon;
 use RealRashid\Cart\Facades\Cart;
 use function Livewire\Volt\{with, usesPagination};
 
@@ -26,7 +27,6 @@ $addToCart = function ($qty, Product $product) {
             ],
         ])
         ->associate($id, $product);
-
     $this->dispatch('added-to-cart');
 
     $this->dispatch('toast', message: 'Successfully added to cart', data: ['position' => 'top-center', 'type' => 'success']);
